@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// learn use of timeWheel
 type RingBuffer struct {
 	slot []*list.List
 	size int64
