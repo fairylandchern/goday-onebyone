@@ -13,7 +13,7 @@ func UnmarshalData(data []byte) (uint32, error) {
 	if len(data) < 4 {
 		return 0, errors.New("err not have enough length")
 	}
-	lenth := binary.BigEndian.Uint32(data)
+	lenth := binary.BigEndian.Uint32(data[:4])
 	if lenth == 0 {
 		return 0, errors.New("err read data empty")
 	}
