@@ -61,7 +61,7 @@ func main() {
 		// can mov process to goroutine
 		err = srv.Serve(ln)
 		if err != nil {
-			log.Fatal("err when server work:", err)
+			log.Fatal("err when version1 work:", err)
 		}
 	}()
 
