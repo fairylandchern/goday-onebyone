@@ -13,6 +13,11 @@ import (
 //	rwlock = sync.RWMutex{}
 //)
 
+type Client struct {
+	conn      net.Conn
+	queueChan chan []byte
+}
+
 func main() {
 	conn, err := net.Dial("tcp", ":9999")
 	if err != nil {

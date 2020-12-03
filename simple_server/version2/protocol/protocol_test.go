@@ -2,6 +2,7 @@ package protocol
 
 import (
 	"reflect"
+	"sort"
 	"testing"
 )
 
@@ -21,4 +22,14 @@ func TestUnmarshalData(t *testing.T) {
 	}
 	readData := data[4:count]
 	t.Log("data count:", count, " data:", string(data), " read data:", string(readData))
+}
+
+// 测试如何使用sort.search方法
+func TestSortSearch(t *testing.T) {
+	x := 2
+	arr := []int{1, 2, 3, 5, 8, 10, 20, 30}
+	i := sort.Search(len(arr), func(i int) bool {
+		return arr[i] >= x
+	})
+	t.Log("index of x:", i)
 }
