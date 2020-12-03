@@ -2,6 +2,7 @@ package main
 
 import (
 	"goday-onebyone/simple_server/version2/protocol"
+	"io"
 	"log"
 	"net"
 )
@@ -28,7 +29,7 @@ func establishConn(conn net.Conn) {
 	buf := make([]byte, 4096)
 	for {
 		count, err := conn.Read(buf)
-		if err != nil {
+		if err != nil && err != io.EOF {
 			log.Fatal("err read data:", err)
 			return
 		}

@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"sync"
 )
 
 //var (
@@ -14,41 +15,70 @@ import (
 //)
 
 type Client struct {
+	seqId     int32
+	queuelen  int32
+	tmout     int32
 	conn      net.Conn
 	queueChan chan []byte
+	lock      sync.RWMutex
+	addr      string
 }
 
 func main() {
-	conn, err := net.Dial("tcp", ":9999")
+	addr := "localhost:9999"
+	cli := NewClient(addr, 30)
+	err := cli.StartServer()
 	if err != nil {
-		log.Fatal("err dial server:", err)
-		return
+		panic(err)
 	}
-	go readData(conn)
+
 	for i := 0; i < 50; i++ {
-		go func(idx int) {
-			//rwlock.Lock()
-			//defer rwlock.Unlock()
-			str := fmt.Sprintf("hello,world:%v", idx)
-			count, err := conn.Write(protocol.MarshalData([]byte(str)))
-			if err != nil {
-				log.Fatal("err write data to server:", err)
-				return
-			}
-			log.Println("write data to server success:", count, " data:", str)
-		}(i)
+		cli.SendData([]byte(fmt.Sprintf("helloworld:%v", i)))
 	}
 	sig := make(chan os.Signal)
 	signal.Notify(sig, os.Interrupt, os.Kill)
 	<-sig
 }
 
-func readData(conn net.Conn) {
-	// read or write conn data here
+func NewClient(addr string, tmout int32) *Client {
+	return &Client{addr: addr, tmout: tmout, queuelen: 100, queueChan: make(chan []byte, 100)}
+}
+
+func (c *Client) StartServer() error {
+	conn, err := net.Dial("tcp", c.addr)
+	if err != nil {
+		log.Println("err dial server:", err)
+		return err
+	}
+	c.conn = conn
+	go c.recv()
+	go c.send()
+	return nil
+}
+
+func (c *Client) SendData(data []byte) {
+	c.queueChan <- data
+}
+
+func (c *Client) send() {
+	for {
+		data, ok := <-c.queueChan
+		if ok {
+			count, err := c.conn.Write(protocol.MarshalData(data))
+			if err != nil {
+				log.Fatal("err write data to server:", err)
+				return
+			}
+			log.Println("write data to server success:", count, " data:", data)
+		}
+	}
+}
+
+func (c *Client) recv() {
 	var data []byte
 	buf := make([]byte, 4096)
 	for {
-		count, err := conn.Read(buf)
+		count, err := c.conn.Read(buf)
 		if err != nil {
 			log.Fatal("err read data:", err)
 			return
