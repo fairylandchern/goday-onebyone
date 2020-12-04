@@ -36,7 +36,7 @@ func establishConn(conn net.Conn) {
 		data = append(data, buf[:count]...)
 		// process protocol here,to parse the syntax exactly
 		for {
-			lenth, err := protocol.UnmarshalData(data)
+			lenth, _, err := protocol.UnmarshalData(data)
 			if err != nil {
 				log.Println("err data not enough:", len(data), " err:", err)
 				break

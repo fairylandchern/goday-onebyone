@@ -10,19 +10,20 @@ import (
 
 // simple format,head+payload
 
-func UnmarshalData(data []byte) (uint32, error) {
+func UnmarshalData(data []byte) (uint32, uint32, error) {
 	if len(data) < 4 {
-		return 0, errors.New("err not have enough length")
+		return 0, 0, errors.New("err not have enough length")
 	}
 	lenth := binary.BigEndian.Uint32(data[0:4])
 	log.Println("lenth:", lenth, " data len:", len(data))
 	if lenth == 0 {
-		return 0, errors.New("err read data empty")
+		return 0, 0, errors.New("err read data empty")
 	}
 	if lenth > uint32(len(data)) {
-		return 0, errors.New("err not have enough data")
+		return 0, 0, errors.New("err not have enough data")
 	}
-	return lenth, nil
+	seqID := binary.BigEndian.Uint32(data[4:8])
+	return lenth, seqID, nil
 }
 
 func MarshalData(data []byte) []byte {
